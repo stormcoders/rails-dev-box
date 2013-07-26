@@ -27,37 +27,6 @@ package { ['sqlite3', 'libsqlite3-dev']:
   ensure => installed;
 }
 
-# --- MySQL --------------------------------------------------------------------
-
-class install_mysql {
-  class { 'mysql': }
-
-  class { 'mysql::server':
-    config_hash => { 'root_password' => '' }
-  }
-
-  database { $ar_databases:
-    ensure  => present,
-    charset => 'utf8',
-    require => Class['mysql::server']
-  }
-
-  database_user { 'rails@localhost':
-    ensure  => present,
-    require => Class['mysql::server']
-  }
-
-  database_grant { ['rails@localhost/activerecord_unittest', 'rails@localhost/activerecord_unittest2']:
-    privileges => ['all'],
-    require    => Database_user['rails@localhost']
-  }
-
-  package { 'libmysqlclient15-dev':
-    ensure => installed
-  }
-}
-class { 'install_mysql': }
-
 # --- PostgreSQL ---------------------------------------------------------------
 
 class install_postgres {
@@ -65,21 +34,10 @@ class install_postgres {
 
   class { 'postgresql::server': }
 
-  pg_database { $ar_databases:
-    ensure   => present,
-    encoding => 'UTF8',
-    require  => Class['postgresql::server']
-  }
-
-  pg_user { 'rails':
-    ensure  => present,
-    require => Class['postgresql::server']
-  }
-
   pg_user { 'vagrant':
-    ensure    => present,
+    ensure  => present,
     superuser => true,
-    require   => Class['postgresql::server']
+    require => Class['postgresql::server']
   }
 
   package { 'libpq-dev':
@@ -137,7 +95,8 @@ exec { 'install_ruby':
   # Thanks to @mpapis for this tip.
   command => "${as_vagrant} '${home}/.rvm/bin/rvm install 2.0.0 && rvm --fuzzy alias create default 2.0.0'",
   creates => "${home}/.rvm/bin/ruby",
-  require => Exec['install_rvm']
+  require => Exec['install_rvm'],
+  timeout => 1800
 }
 
 exec { "${as_vagrant} 'gem install bundler --no-rdoc --no-ri'":
