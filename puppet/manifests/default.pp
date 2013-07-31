@@ -27,6 +27,12 @@ package { ['sqlite3', 'libsqlite3-dev']:
   ensure => installed;
 }
 
+# --- ImageMagick ---------------------------------------------------------------
+
+package { ['imagemagick', 'libmagickcore-dev', 'libmagickwand-dev']:
+  ensure => installed;
+}
+
 # --- PostgreSQL ---------------------------------------------------------------
 
 class install_postgres {
